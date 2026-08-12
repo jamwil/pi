@@ -391,10 +391,13 @@ if (process.platform !== "win32") fs.chmodSync(piPath, 0o755);
 
 	it("does not report packages as up to date when npm left an older version installed", async () => {
 		prepareStaleNpmPackage("1.2.0", "1.3.0");
+		// main() forces PI_OFFLINE, which skips the update flow entirely; call the
+		// command directly with the flag cleared so the stale-version warning path stays covered.
+		vi.stubEnv("PI_OFFLINE", "");
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 		const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-		await expect(main(["update", "--extensions"])).resolves.toBeUndefined();
+		await expect(runPackageCommandDirectly(["update", "--extensions"])).resolves.toBeUndefined();
 
 		const progress = stdoutSpy.mock.calls.map(([chunk]) => String(chunk)).join("");
 		const stdout = logSpy.mock.calls.map(([message]) => String(message)).join("\n");
@@ -405,7 +408,7 @@ if (process.platform !== "win32") fs.chmodSync(piPath, 0o755);
 
 	it("does not report packages as up to date in offline mode", async () => {
 		prepareStaleNpmPackage("1.2.0", "1.3.0");
-		// main() writes both variables in offline mode; stubbing them lets afterEach restore them.
+		// main() unconditionally writes both variables; stubbing them lets afterEach restore them.
 		vi.stubEnv("PI_OFFLINE", "1");
 		vi.stubEnv("PI_SKIP_VERSION_CHECK", "1");
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -417,7 +420,7 @@ if (process.platform !== "win32") fs.chmodSync(piPath, 0o755);
 		expect(stdout).not.toContain("up to date");
 	});
 
-	it("uses saved project trust during update", async () => {
+	it("skips update despite saved project trust when offline", async () => {
 		mkdirSync(join(projectDir, ".pi"), { recursive: true });
 		const fakeNpmPath = join(tempDir, "fake-trusted-project-npm.cjs");
 		const recordPath = join(tempDir, "trusted-project-update.json");
@@ -435,7 +438,7 @@ if (process.platform !== "win32") fs.chmodSync(piPath, 0o755);
 		try {
 			await expect(main(["update", "--extensions"])).resolves.toBeUndefined();
 
-			expect(existsSync(recordPath)).toBe(true);
+			expect(existsSync(recordPath)).toBe(false);
 			expect(process.exitCode).toBeUndefined();
 		} finally {
 			logSpy.mockRestore();
