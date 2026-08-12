@@ -8,7 +8,6 @@ import {
 	getAttributionHeaders,
 	type Model,
 	normalizeContext,
-	PI_ATTRIBUTION,
 	type SimpleStreamOptions,
 } from "@earendil-works/pi-ai";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -139,20 +138,16 @@ describe("createAgentSession client identity", () => {
 		}
 	}
 
-	it("identifies pi with a detailed User-Agent and attribution as a CLI agent", async () => {
+	it("does not attribute pi to providers (install telemetry is severed)", async () => {
 		const model = createModel("openrouter", "https://openrouter.ai/api/v1");
 		const options = await captureOptions(model);
 
 		expect(options?.identity).toEqual({
 			userAgent: "detailed",
 			version: VERSION,
-			attribution: PI_ATTRIBUTION,
+			attribution: null,
 		});
-		expect(getAttributionHeaders(model, options?.identity)).toEqual({
-			"HTTP-Referer": "https://pi.dev",
-			"X-OpenRouter-Title": "pi",
-			"X-OpenRouter-Categories": "cli-agent",
-		});
+		expect(getAttributionHeaders(model, options?.identity)).toEqual({});
 	});
 
 	it("turns attribution off when telemetry is disabled", async () => {
