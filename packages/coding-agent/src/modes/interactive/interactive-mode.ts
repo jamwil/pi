@@ -123,7 +123,13 @@ import type { TruncationResult } from "../../core/tools/truncate.ts";
 import { hasTrustRequiringProjectResources, ProjectTrustStore } from "../../core/trust-manager.ts";
 import { getUsageCostBreakdown } from "../../core/usage-totals.ts";
 import { addMcpServerConfig } from "../../extensions/mcp/config.ts";
-import { getChangelogPath, getNewEntries, normalizeChangelogLinks, parseChangelog } from "../../utils/changelog.ts";
+import {
+	getChangelogPath,
+	getNewEntries,
+	normalizeChangelogLinks,
+	parseChangelog,
+	releaseVersion,
+} from "../../utils/changelog.ts";
 import { copyToClipboard, readClipboardFilePaths, readClipboardText } from "../../utils/clipboard.ts";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.ts";
 import { flushStdout } from "../../utils/flush-stdout.ts";
@@ -1469,7 +1475,13 @@ export class InteractiveMode {
 				continue;
 			}
 
-			const newEntries = getNewEntries(parseChangelog(sourceInfo.changelogPath), lastVersion);
+			// Extension changelogs compare against the release, ignoring a prerelease in the last seen
+			// version so its notes do not repeat on every launch (#11703). The agent's own changelog
+			// above keeps the fork's prerelease ordering instead.
+			const newEntries = getNewEntries(
+				parseChangelog(sourceInfo.changelogPath),
+				releaseVersion(lastVersion) ?? lastVersion,
+			);
 			if (!newEntries) {
 				// Unreadable saved version: show nothing and record the current one so later updates compare again
 				this.settingsManager.setExtensionChangelogVersion(key, pkg.version);
