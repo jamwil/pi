@@ -18,7 +18,6 @@ import type {
 	MermaidRenderingMode,
 	PackageSource,
 	QuietStartup,
-	SessionShareDestination,
 	Settings,
 	ThinkingBudgetsSettings,
 	TransportSetting,
@@ -42,7 +41,6 @@ export type {
 	ProviderRetrySettings,
 	QuietStartup,
 	RetrySettings,
-	SessionShareDestination,
 	Settings,
 	TerminalSettings,
 	ThinkingBudgetsSettings,
@@ -801,19 +799,6 @@ export class SettingsManager {
 	setTransport(transport: TransportSetting): void {
 		this.globalSettings.transport = transport;
 		this.markModified("transport");
-		this.save();
-	}
-
-	getSessionShareDestination(): SessionShareDestination {
-		const destination = this.settings.sessionShareDestination;
-		return destination === "gist" || destination === "radius"
-			? destination
-			: SETTINGS_DEFAULTS.sessionShareDestination;
-	}
-
-	setSessionShareDestination(destination: SessionShareDestination): void {
-		this.globalSettings.sessionShareDestination = destination;
-		this.markModified("sessionShareDestination");
 		this.save();
 	}
 
