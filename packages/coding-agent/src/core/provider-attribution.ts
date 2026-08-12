@@ -35,9 +35,9 @@ function isCloudflareModel(model: Model<Api>): boolean {
 
 function getDefaultAttributionHeaders(
 	model: Model<Api>,
-	settingsManager: SettingsManager,
+	_settingsManager: SettingsManager,
 ): Record<string, string> | undefined {
-	if (!isInstallTelemetryEnabled(settingsManager)) {
+	if (!isInstallTelemetryEnabled()) {
 		return undefined;
 	}
 

@@ -573,11 +573,13 @@ export interface MainOptions {
 export async function main(args: string[], options?: MainOptions) {
 	resetTimings();
 	const extensionFactories = [...builtInExtensions, ...(options?.extensionFactories ?? [])];
-	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);
-	if (offlineMode) {
-		process.env.PI_OFFLINE = "1";
-		process.env.PI_SKIP_VERSION_CHECK = "1";
-	}
+	// Offline mode is forced: no startup network operations are permitted. Only
+	// inference provider calls are allowed. Setting PI_OFFLINE propagates to all
+	// downstream gates (version check, model catalog refresh, tool downloads,
+	// package manager operations).
+	process.env.PI_OFFLINE = "1";
+	process.env.PI_SKIP_VERSION_CHECK = "1";
+	const offlineMode = true;
 
 	if (await runAuthCommand(args)) {
 		return;
