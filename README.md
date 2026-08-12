@@ -1,3 +1,7 @@
+**Note**: This is a personal fork of [pi](https://github.com/earendil-works/pi-mono) at [jamwil/pi-mono](https://github.com/jamwil/pi-mono); what follows is the upstream README.
+
+---
+
 <p align="center">
   <a href="https://pi.dev">
     <img alt="pi logo" src="https://pi.dev/logo-auto.svg" width="128">

@@ -11,7 +11,7 @@ const outputDir = join(codingAgentDir, "install-lock");
 const rootLockfilePath = join(repoRoot, "package-lock.json");
 const outputPackageJsonPath = join(outputDir, "package.json");
 const outputLockfilePath = join(outputDir, "package-lock.json");
-const internalPackagePrefix = "@earendil-works/pi-";
+const internalPackagePrefixes = ["@earendil-works/pi-", "@jamwil/pi-"];
 const internalPackageNames = new Set(["@earendil-works/chord"]);
 const installPackageName = "@earendil-works/pi-coding-agent-install";
 const allowedInstallScriptPackages = new Map([
@@ -145,7 +145,10 @@ function getInternalWorkspaces(lockPackages) {
 		if (!lockPath.startsWith("packages/") || lockPath.includes("/node_modules/") || !entry.name || !entry.version) {
 			continue;
 		}
-		if (!entry.name.startsWith(internalPackagePrefix) && !internalPackageNames.has(entry.name)) {
+		if (
+			!internalPackagePrefixes.some((prefix) => entry.name.startsWith(prefix)) &&
+			!internalPackageNames.has(entry.name)
+		) {
 			continue;
 		}
 
@@ -280,6 +283,15 @@ function validateGeneratedFiles(installerPackageJson, installLock, internalNames
 	const rootEntry = installLock.packages[""];
 	const includedPackageNames = new Set();
 	const seenAllowedInstallScriptPackages = new Set();
+	// The coding-agent is the installer's single root dependency and is itself
+	// an internal workspace, so it is excluded from the version-coherence check
+	// below: forks publish it under the upstream release version, plus a fork
+	// prerelease for same-base hotfixes (e.g. 1.0.0, 1.0.1-jamwil.0), while its
+	// upstream @earendil-works/pi-* deps stay pinned at the upstream release
+	// version (e.g. 1.0.0). The remaining internal packages must still share a
+	// single version among themselves (upstream lockstep).
+	const rootDependencyName = Object.keys(installerPackageJson.dependencies)[0];
+	let internalVersion;
 
 	if (installLock.lockfileVersion !== 3) {
 		errors.push("package-lock.json must use lockfileVersion 3");
@@ -311,11 +323,18 @@ function validateGeneratedFiles(installerPackageJson, installLock, internalNames
 			errors.push(`${lockPath || "root"} contains dev/extraneous metadata`);
 		}
 		if (
-			packageName !== undefined &&
-			(packageName.startsWith(internalPackagePrefix) || internalPackageNames.has(packageName)) &&
-			entry.version !== installerPackageJson.version
+			packageName &&
+			packageName !== rootDependencyName &&
+			(internalPackagePrefixes.some((prefix) => packageName.startsWith(prefix)) ||
+				internalPackageNames.has(packageName))
 		) {
-			errors.push(`${lockPath} internal package version ${entry.version} does not match ${installerPackageJson.version}`);
+			if (internalVersion === undefined) {
+				internalVersion = entry.version;
+			} else if (entry.version !== internalVersion) {
+				errors.push(
+					`${lockPath} internal package version ${entry.version} does not match ${internalVersion}`,
+				);
+			}
 		}
 		if (entry.hasInstallScript) {
 			if (!packageName || !entry.version) {
