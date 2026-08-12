@@ -1353,7 +1353,7 @@ export class InteractiveMode {
 			return;
 		}
 
-		if (!isInstallTelemetryEnabled(this.settingsManager)) {
+		if (!isInstallTelemetryEnabled()) {
 			return;
 		}
 
