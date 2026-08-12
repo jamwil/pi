@@ -1,10 +1,12 @@
 import path from "node:path";
 import { existsSync, readFileSync } from "fs";
+import { compare, valid } from "semver";
 
 export interface ChangelogEntry {
 	major: number;
 	minor: number;
 	patch: number;
+	prerelease?: string;
 	content: string;
 }
 
@@ -15,7 +17,8 @@ const URL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;
 const INLINE_MARKDOWN_LINK_RE = /(!?\[[^\]\n]+\]\()([^\s)]+)((?:\s+[^)]*)?\))/g;
 
 function entryVersion(entry: ChangelogEntry): string {
-	return `${entry.major}.${entry.minor}.${entry.patch}`;
+	const base = `${entry.major}.${entry.minor}.${entry.patch}`;
+	return entry.prerelease ? `${base}-${entry.prerelease}` : base;
 }
 
 function normalizeTag(version: string | ChangelogEntry): string {
@@ -133,12 +136,13 @@ export function parseChangelog(changelogPath: string): ChangelogEntry[] {
 				}
 
 				// Try to parse version from this line
-				const versionMatch = line.match(/##\s+\[?(\d+)\.(\d+)\.(\d+)\]?/);
+				const versionMatch = line.match(/##\s+\[?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?\]?/);
 				if (versionMatch) {
 					currentVersion = {
 						major: Number.parseInt(versionMatch[1], 10),
 						minor: Number.parseInt(versionMatch[2], 10),
 						patch: Number.parseInt(versionMatch[3], 10),
+						...(versionMatch[4] ? { prerelease: versionMatch[4] } : {}),
 					};
 					currentLines = [line];
 				} else {
@@ -169,33 +173,56 @@ export function parseChangelog(changelogPath: string): ChangelogEntry[] {
 }
 
 /**
- * Compare versions. Returns: -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2
+ * Compare versions including prerelease tags. Returns: -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2.
+ * Falls back to numeric major/minor/patch comparison when either side is not a
+ * valid semver string (e.g. a malformed header).
  */
 export function compareVersions(v1: ChangelogEntry, v2: ChangelogEntry): number {
+	const a = valid(entryVersion(v1));
+	const b = valid(entryVersion(v2));
+	if (a && b) {
+		return compare(a, b);
+	}
 	if (v1.major !== v2.major) return v1.major - v2.major;
 	if (v1.minor !== v2.minor) return v1.minor - v2.minor;
 	return v1.patch - v2.patch;
 }
 
 /**
- * Get entries newer than lastVersion, or undefined when lastVersion has no major.minor.patch to compare against
+ * Get entries newer than lastVersion, or undefined when lastVersion has no major.minor.patch to compare against.
+ * The fork publishes semver prereleases (X.Y.Z-dev.N, X.Y.Z-jamwil.N), so lastVersion may carry a
+ * prerelease suffix; it sorts below its associated release per semver precedence, so a user on a
+ * fork prerelease still sees the release's notes once the rebase carries them. Upstream instead
+ * ignores the suffix (#11703), which would hide release notes from hotfix builds.
  */
 export function getNewEntries(entries: ChangelogEntry[], lastVersion: string): ChangelogEntry[] | undefined {
-	// Read only the leading major.minor.patch, like the changelog headings, so a prerelease such as
-	// 0.1.5-20261020.7 counts as 0.1.5 and its notes are not shown again on every launch (#11703).
-	// Alternatives considered: plain string comparison orders 0.10.0 before 0.9.0; numeric localeCompare
-	// works by accident and is locale-dependent; strict semver orders 0.1.5-x before 0.1.5, which repeats
-	// the [0.1.5] notes forever.
-	const parts = lastVersion.trim().match(/^v?(\d+)\.(\d+)\.(\d+)/);
-	if (!parts) return undefined;
-	const last: ChangelogEntry = {
-		major: Number(parts[1]),
-		minor: Number(parts[2]),
-		patch: Number(parts[3]),
-		content: "",
-	};
+	const last = parseVersionToEntry(lastVersion);
+	if (!last) return undefined;
 
 	return entries.filter((entry) => compareVersions(entry, last) > 0);
+}
+
+function parseVersionToEntry(version: string): ChangelogEntry | undefined {
+	const match = version.trim().match(/^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
+	if (!match) return undefined;
+	return {
+		major: Number.parseInt(match[1], 10),
+		minor: Number.parseInt(match[2], 10),
+		patch: Number.parseInt(match[3], 10),
+		...(match[4] ? { prerelease: match[4] } : {}),
+		content: "",
+	};
+}
+
+/**
+ * The release (major.minor.patch) part of a version string, dropping any prerelease or build
+ * suffix, or undefined when it has no major.minor.patch. Extension changelogs compare against
+ * the release so a prerelease extension version does not repeat its release's notes on every
+ * launch (#11703); the agent's own changelog keeps the full version instead.
+ */
+export function releaseVersion(version: string): string | undefined {
+	const match = version.trim().match(/^v?(\d+)\.(\d+)\.(\d+)/);
+	return match ? `${match[1]}.${match[2]}.${match[3]}` : undefined;
 }
 
 // Re-export getChangelogPath from paths.ts for convenience
