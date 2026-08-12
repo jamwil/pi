@@ -1,10 +1,12 @@
 import path from "node:path";
 import { existsSync, readFileSync } from "fs";
+import { compare, valid } from "semver";
 
 export interface ChangelogEntry {
 	major: number;
 	minor: number;
 	patch: number;
+	prerelease?: string;
 	content: string;
 }
 
@@ -15,7 +17,8 @@ const URL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;
 const INLINE_MARKDOWN_LINK_RE = /(!?\[[^\]\n]+\]\()([^\s)]+)((?:\s+[^)]*)?\))/g;
 
 function entryVersion(entry: ChangelogEntry): string {
-	return `${entry.major}.${entry.minor}.${entry.patch}`;
+	const base = `${entry.major}.${entry.minor}.${entry.patch}`;
+	return entry.prerelease ? `${base}-${entry.prerelease}` : base;
 }
 
 function normalizeTag(version: string | ChangelogEntry): string {
@@ -133,12 +136,13 @@ export function parseChangelog(changelogPath: string): ChangelogEntry[] {
 				}
 
 				// Try to parse version from this line
-				const versionMatch = line.match(/##\s+\[?(\d+)\.(\d+)\.(\d+)\]?/);
+				const versionMatch = line.match(/##\s+\[?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?\]?/);
 				if (versionMatch) {
 					currentVersion = {
 						major: Number.parseInt(versionMatch[1], 10),
 						minor: Number.parseInt(versionMatch[2], 10),
 						patch: Number.parseInt(versionMatch[3], 10),
+						...(versionMatch[4] ? { prerelease: versionMatch[4] } : {}),
 					};
 					currentLines = [line];
 				} else {
@@ -168,28 +172,45 @@ export function parseChangelog(changelogPath: string): ChangelogEntry[] {
 }
 
 /**
- * Compare versions. Returns: -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2
+ * Compare versions including prerelease tags. Returns: -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2.
+ * Falls back to numeric major/minor/patch comparison when either side is not a
+ * valid semver string (e.g. a malformed header).
  */
 export function compareVersions(v1: ChangelogEntry, v2: ChangelogEntry): number {
+	const a = valid(entryVersion(v1));
+	const b = valid(entryVersion(v2));
+	if (a && b) {
+		return compare(a, b);
+	}
 	if (v1.major !== v2.major) return v1.major - v2.major;
 	if (v1.minor !== v2.minor) return v1.minor - v2.minor;
 	return v1.patch - v2.patch;
 }
 
 /**
- * Get entries newer than lastVersion
+ * Get entries newer than lastVersion. lastVersion may be a full semver
+ * including a prerelease suffix (e.g. "0.84.2-dev.0"); prereleases sort below
+ * their associated release per semver precedence.
  */
 export function getNewEntries(entries: ChangelogEntry[], lastVersion: string): ChangelogEntry[] {
-	// Parse lastVersion
-	const parts = lastVersion.split(".").map(Number);
-	const last: ChangelogEntry = {
-		major: parts[0] || 0,
-		minor: parts[1] || 0,
-		patch: parts[2] || 0,
-		content: "",
-	};
+	const lastValid = valid(lastVersion);
+	const last: ChangelogEntry = lastValid ? parseVersionToEntry(lastValid) : parseVersionToEntry(lastVersion);
 
 	return entries.filter((entry) => compareVersions(entry, last) > 0);
+}
+
+function parseVersionToEntry(version: string): ChangelogEntry {
+	const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
+	if (match) {
+		return {
+			major: Number.parseInt(match[1], 10),
+			minor: Number.parseInt(match[2], 10),
+			patch: Number.parseInt(match[3], 10),
+			...(match[4] ? { prerelease: match[4] } : {}),
+			content: "",
+		};
+	}
+	return { major: 0, minor: 0, patch: 0, content: "" };
 }
 
 // Re-export getChangelogPath from paths.ts for convenience
