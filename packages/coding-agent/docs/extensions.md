@@ -49,6 +49,8 @@ Use a single file for a small extension and a directory for a multi-file impleme
 
 Reload replaces the extension runtime, so code after `await ctx.reload()` must not reuse state from the old runtime. Only personal and explicit command-line extensions can participate in the `project_trust` event that runs before project extensions load.
 
+The standalone Node distribution embeds a set of runtime imports for extensions, including `typebox/compile`, `typebox/value`, `@earendil-works/pi-ai/compat`, `@earendil-works/pi-ai/oauth`, and `@earendil-works/pi-ai/providers/all`. It also supports `@earendil-works/pi-agent-core` and the legacy `@mariozechner/*` package names. Other third-party runtime dependencies are not embedded; install them in `node_modules` next to the extension (or in a parent directory).
+
 <a id="understand-the-lifecycle"></a>
 
 ## Respect the runtime lifecycle

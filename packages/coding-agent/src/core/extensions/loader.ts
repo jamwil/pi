@@ -41,7 +41,8 @@ const isNodeSeaBinary =
 	("sea" in process.features && process.features.sea === true) ||
 	process.getBuiltinModule("node:sea")?.isSea() === true;
 const isTypeScriptSourceRuntime = !isBunBinary && path.extname(fileURLToPath(import.meta.url)) === ".ts";
-const usesEmbeddedModules = isBunBinary || isNodeSeaBinary || isBundledNode;
+const isStandaloneBundle = process.env.PI_STANDALONE_BUNDLE === "1";
+const usesEmbeddedModules = isBunBinary || isNodeSeaBinary || isBundledNode || isStandaloneBundle;
 
 let createJitiPromise: Promise<typeof createJiti> | undefined;
 
@@ -559,9 +560,9 @@ async function loadExtensionModule(extensionPath: string, cacheToken?: Extension
 	}
 
 	const createJitiImpl = await getCreateJiti();
-	// Compiled binaries and the bundled Node distribution use embedded modules.
-	// Source TypeScript reuses host modules and root tsconfig paths. Unbundled
-	// Node builds use dist aliases and do not need the bundled virtual modules.
+	// Compiled binaries, the bundled Node distribution, and the standalone
+	// distribution use embedded modules. Source TypeScript reuses host modules
+	// and root tsconfig paths. Unbundled Node builds use dist aliases.
 	const resolutionOptions = usesEmbeddedModules
 		? { virtualModules: await getVirtualModules(), tryNative: false }
 		: isTypeScriptSourceRuntime
