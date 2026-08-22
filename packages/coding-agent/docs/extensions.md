@@ -306,6 +306,8 @@ Run `npm install` in the extension directory, then imports from `node_modules/` 
 
 ## Events
 
+The standalone Node distribution embeds a set of runtime imports for extensions, including `typebox/compile`, `typebox/value`, `@earendil-works/pi-ai/compat`, `@earendil-works/pi-ai/oauth`, and `@earendil-works/pi-ai/providers/all`. It also supports `@earendil-works/pi-agent-core` and the legacy `@mariozechner/*` package names. Other third-party runtime dependencies are not embedded; install them in `node_modules` next to the extension (or in a parent directory).
+
 <a id="understand-the-lifecycle"></a>
 
 ### Lifecycle Overview
