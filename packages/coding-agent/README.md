@@ -1,4 +1,11 @@
-**Note**: This is a personal fork of [pi](https://github.com/earendil-works/pi-mono) at [jamwil/pi-mono](https://github.com/jamwil/pi-mono); what follows is the upstream README.
+**Note**: This is a personal fork of [pi](https://github.com/earendil-works/pi-mono) at [jamwil/pi](https://github.com/jamwil/pi), rebased onto upstream regularly. It differs as follows:
+
+- All telemetry and non-provider network calls (update checks, model catalog refresh) are disabled unconditionally.
+- The `/share` and `/bug` commands are removed; sessions are not uploaded anywhere.
+- The CLI is published as [`@jamwil/pi-coding-agent`](https://www.npmjs.com/package/@jamwil/pi-coding-agent); see [PUBLISH_FORK.md](https://github.com/jamwil/pi/blob/dev/PUBLISH_FORK.md) for versioning and the release process.
+- The npm package includes a standalone Node build (`dist/standalone/cli.mjs`) that runs without `node_modules`.
+
+The rest of this README is inherited from upstream.
 
 ---
 
@@ -8,11 +15,8 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
-  <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@earendil-works/pi-coding-agent?style=flat-square&logo=npm&logoColor=white" /></a>
+  <a href="https://www.npmjs.com/package/@jamwil/pi-coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@jamwil/pi-coding-agent?style=flat-square&logo=npm&logoColor=white" /></a>
 </p>
-
-> New issues and PRs from new contributors are closed automatically. Maintainers review closed submissions daily. See [CONTRIBUTING.md](https://github.com/earendil-works/pi/blob/main/CONTRIBUTING.md).
 
 # Pi
 
@@ -77,7 +81,7 @@ npm run check
 ./test.sh
 ```
 
-Read [CONTRIBUTING.md](https://github.com/earendil-works/pi/blob/main/CONTRIBUTING.md) before opening an issue or pull request. It defines the contribution gate, issue quality bar, and required checks. Read [AGENTS.md](https://github.com/earendil-works/pi/blob/main/AGENTS.md) for repository-specific implementation, testing, dependency, and release rules.
+Read [CONTRIBUTING.md](https://github.com/jamwil/pi/blob/dev/CONTRIBUTING.md) for contribution guidelines and [AGENTS.md](https://github.com/jamwil/pi/blob/dev/AGENTS.md) for repository-specific rules.
 
 ## License
 
