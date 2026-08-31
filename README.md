@@ -1,4 +1,11 @@
-**Note**: This is a personal fork of [pi](https://github.com/earendil-works/pi-mono) at [jamwil/pi-mono](https://github.com/jamwil/pi-mono); what follows is the upstream README.
+**Note**: This is a personal fork of [pi](https://github.com/earendil-works/pi-mono) at [jamwil/pi](https://github.com/jamwil/pi), rebased onto upstream regularly. It differs as follows:
+
+- All telemetry and non-provider network calls (update checks, model catalog refresh) are disabled unconditionally.
+- The `/share` and `/bug` commands are removed; sessions are not uploaded anywhere.
+- The CLI is published as [`@jamwil/pi-coding-agent`](https://www.npmjs.com/package/@jamwil/pi-coding-agent); see [PUBLISH_FORK.md](PUBLISH_FORK.md) for versioning and the release process.
+- The npm package includes a standalone Node build (`dist/standalone/cli.mjs`) that runs without `node_modules`.
+
+The rest of this README is inherited from upstream.
 
 ---
 
@@ -8,13 +15,10 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
-  <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@earendil-works/pi-coding-agent?style=flat-square" /></a>
+  <a href="https://www.npmjs.com/package/@jamwil/pi-coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@jamwil/pi-coding-agent?style=flat-square" /></a>
 </p>
 
-> New issues and PRs from new contributors are auto-closed by default. Maintainers review auto-closed issues daily. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-# Pi
+# Pi Agent Harness
 
 Pi is a minimal, extensible agent harness that you can make your own.
 
@@ -85,7 +89,7 @@ If you need stronger boundaries, containerize or sandbox Pi. See [packages/codin
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines and [AGENTS.md](AGENTS.md) for project-specific rules (for both humans and agents).  Longer term plans for Pi can also be found in [RFCs](https://rfc.earendil.com/keyword/pi/).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines and [AGENTS.md](AGENTS.md) for project-specific rules (for both humans and agents).
 
 ## Development
 
