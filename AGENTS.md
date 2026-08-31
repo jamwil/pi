@@ -73,7 +73,7 @@ If rebase conflicts occur:
 
 ## Issues and PRs
 
-See `CONTRIBUTING.md` for the contributor gate (auto-close workflows, `lgtm`/`lgtmi`, quality bar).
+See `CONTRIBUTING.md` for contribution guidelines.
 
 When reviewing PRs:
 
@@ -118,7 +118,7 @@ Attribution:
 
 ## Releasing
 
-For release preparation, publishing, verification, or recovery, load and follow [.pi/skills/release.md](.pi/skills/release.md).
+For fork releases, follow [PUBLISH_FORK.md](PUBLISH_FORK.md) at the repo root.
 
 ## User Override
 
