@@ -4,6 +4,11 @@ import { join } from "node:path";
 const dependencySections = ["dependencies", "devDependencies", "optionalDependencies"];
 const exactVersionPattern = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const ignoredDirectories = new Set([".git", "dist", "node_modules"]);
+// #10865 keeps internal workspace dependencies exactly pinned. The fork's own published package
+// is the one exception: evals devDependencies pins it as "*" so the workspace link keeps resolving
+// across the fork's prerelease version bumps (see PUBLISH_FORK.md) instead of pulling a published
+// stable tarball from the registry.
+const forkRootPackageName = "@jamwil/pi-coding-agent";
 const packageJsonFiles = [];
 
 function collectPackageJsonFiles(directory) {
@@ -19,6 +24,10 @@ function collectPackageJsonFiles(directory) {
 			packageJsonFiles.push(join(directory, entry.name));
 		}
 	}
+}
+
+function isExemptFromPinning(name) {
+	return name === forkRootPackageName;
 }
 
 function isNonRegistrySpecifier(specifier) {
@@ -45,7 +54,7 @@ for (const file of packageJsonFiles.sort()) {
 		if (!dependencies) continue;
 
 		for (const [name, specifier] of Object.entries(dependencies)) {
-			if (isNonRegistrySpecifier(specifier)) continue;
+			if (isExemptFromPinning(name) || isNonRegistrySpecifier(specifier)) continue;
 			if (exactVersionPattern.test(getVersionSpecifier(specifier))) continue;
 			failures.push(`${file}: ${section}.${name} must be pinned, found ${specifier}`);
 		}
