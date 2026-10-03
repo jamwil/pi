@@ -21,6 +21,9 @@ export default mergeConfig(
 		},
 		resolve: {
 			alias: [
+				// The workspace package is @jamwil/pi-coding-agent; statically imported examples keep
+				// the upstream name, so resolve it to the workspace source like the other pi-* packages.
+				{ find: /^@earendil-works\/pi-coding-agent$/, replacement: workspaceSourcePaths.codingAgentIndex },
 				{ find: /^@earendil-works\/pi-ai$/, replacement: workspaceSourcePaths.aiIndex },
 				{ find: /^@earendil-works\/pi-agent-core$/, replacement: workspaceSourcePaths.agentIndex },
 				{ find: /^@mariozechner\/pi-ai$/, replacement: workspaceSourcePaths.aiIndex },
