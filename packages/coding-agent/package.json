@@ -1,10 +1,13 @@
 {
-	"name": "@earendil-works/pi-coding-agent",
+	"name": "@jamwil/pi-coding-agent",
 	"version": "1.0.1",
 	"description": "Coding agent CLI with read, bash, edit, write tools and session management",
 	"type": "module",
 	"piConfig": {
 		"configDir": ".pi"
+	},
+	"publishConfig": {
+		"access": "public"
 	},
 	"bin": {
 		"pi": "dist/bundle/cli.js"
@@ -99,7 +102,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
+		"url": "git+https://github.com/jamwil/pi.git",
 		"directory": "packages/coding-agent"
 	},
 	"engines": {
