@@ -1,14 +1,40 @@
 {
-	"name": "@earendil-works/pi-coding-agent-install",
+	"name": "@jamwil/pi-coding-agent",
 	"version": "1.0.3",
 	"lockfileVersion": 3,
 	"requires": true,
 	"packages": {
 		"": {
-			"name": "@earendil-works/pi-coding-agent-install",
+			"name": "@jamwil/pi-coding-agent",
 			"version": "1.0.3",
+			"license": "MIT",
 			"dependencies": {
-				"@jamwil/pi-coding-agent": "1.0.3"
+				"@earendil-works/chord": "^1.0.3",
+				"@earendil-works/pi-agent-core": "^1.0.3",
+				"@earendil-works/pi-ai": "^1.0.3",
+				"@earendil-works/pi-codemode": "^1.0.3",
+				"@earendil-works/pi-mcp": "^1.0.3",
+				"@earendil-works/pi-tui": "^1.0.3",
+				"@silvia-odwyer/photon-node": "0.3.4",
+				"brace-expansion": "5.0.12",
+				"chalk": "6.0.0",
+				"cross-spawn": "7.0.6",
+				"diff": "8.0.4",
+				"grok-mermaid": "0.2.3",
+				"highlight.js": "10.7.3",
+				"hosted-git-info": "9.0.3",
+				"ignore": "7.0.8",
+				"jiti": "2.7.0",
+				"minimatch": "10.2.6",
+				"proper-lockfile": "4.1.2",
+				"quickjs-wasi": "3.6.2",
+				"semver": "7.8.5",
+				"typebox": "1.3.27",
+				"undici": "8.10.2",
+				"yaml": "2.9.0"
+			},
+			"bin": {
+				"pi": "dist/bundle/cli.js"
 			},
 			"engines": {
 				"node": ">=22.19.0"
@@ -972,42 +998,6 @@
 				"node": ">=20.0.0"
 			},
 			"hasInstallScript": true
-		},
-		"node_modules/@jamwil/pi-coding-agent": {
-			"version": "1.0.3",
-			"resolved": "https://registry.npmjs.org/@jamwil/pi-coding-agent/-/pi-coding-agent-1.0.3.tgz",
-			"license": "MIT",
-			"dependencies": {
-				"@earendil-works/chord": "^1.0.3",
-				"@earendil-works/pi-agent-core": "^1.0.3",
-				"@earendil-works/pi-ai": "^1.0.3",
-				"@earendil-works/pi-codemode": "^1.0.3",
-				"@earendil-works/pi-mcp": "^1.0.3",
-				"@earendil-works/pi-tui": "^1.0.3",
-				"@silvia-odwyer/photon-node": "0.3.4",
-				"brace-expansion": "5.0.12",
-				"chalk": "6.0.0",
-				"cross-spawn": "7.0.6",
-				"diff": "8.0.4",
-				"grok-mermaid": "0.2.3",
-				"highlight.js": "10.7.3",
-				"hosted-git-info": "9.0.3",
-				"ignore": "7.0.8",
-				"jiti": "2.7.0",
-				"minimatch": "10.2.6",
-				"proper-lockfile": "4.1.2",
-				"quickjs-wasi": "3.6.2",
-				"semver": "7.8.5",
-				"typebox": "1.3.27",
-				"undici": "8.10.2",
-				"yaml": "2.9.0"
-			},
-			"bin": {
-				"pi": "dist/bundle/cli.js"
-			},
-			"engines": {
-				"node": ">=22.19.0"
-			}
 		},
 		"node_modules/@protobufjs/aspromise": {
 			"version": "1.1.2",
