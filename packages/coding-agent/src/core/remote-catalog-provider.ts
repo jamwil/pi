@@ -74,10 +74,8 @@ function remoteModels(entry: ModelsStoreEntry | undefined, localGeneratedAt: num
 
 /**
  * Request one provider's catalog from pi.dev. The User-Agent carries this pi's version, and pi.dev
- * serves the newest catalog published for a minimum version at or below it (see
- * `scripts/model-catalog-minimum-version.mjs` and `selectModelCatalog()` in
- * `scripts/model-catalog-protocol.ts`). So a client receives catalogs published after its release,
- * and those catalogs must work with this client's code.
+ * serves the newest catalog published for a minimum version at or below it. A client receives
+ * catalogs published after its release, so those catalogs must work with this client's code.
  */
 function requestCatalog(
 	providerId: string,

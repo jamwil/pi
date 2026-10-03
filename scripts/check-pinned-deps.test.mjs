@@ -61,3 +61,19 @@ test("rejects registry alias ranges", async (t) => {
 	assert.equal(result.status, 1);
 	assert.match(result.stderr, /dependencies\.alias must be pinned/);
 });
+
+test("accepts the fork's own package pinned with \"*\" while internal earendil ranges stay rejected", async (t) => {
+	const result = await check(t, {
+		devDependencies: { "@jamwil/pi-coding-agent": "*", "@earendil-works/pi-ai": "^1.4.0" },
+	});
+	assert.equal(result.status, 1);
+	assert.match(result.stderr, /devDependencies\.@earendil-works\/pi-ai must be pinned/);
+	assert.doesNotMatch(result.stderr, /@jamwil\/pi-coding-agent must be pinned/);
+});
+
+test("accepts the fork's own package pinned with \"*\" beside exact internal pins", async (t) => {
+	const result = await check(t, {
+		devDependencies: { "@jamwil/pi-coding-agent": "*", "@earendil-works/pi-ai": "1.4.0" },
+	});
+	assert.equal(result.status, 0, result.stderr);
+});
