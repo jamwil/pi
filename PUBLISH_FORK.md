@@ -35,7 +35,24 @@ and exact pins (install-lock) receive everything. If upstream skips the
 anticipated patch (for example ships `1.1.0` instead of `1.0.1`), the
 prerelease is simply orphaned; nothing collides.
 
-Tags match versions: `v1.0.0`, `v1.0.1-jamwil.0`, `v1.0.1-dev.0`.
+## Tags
+
+Upstream release tags are mirrored into this repository: the daily sync
+pushes upstream's tags to origin, so plain `vX.Y.Z` names are taken. Every
+fork release tag therefore appends `+jamwil` to the version. The npm version
+cannot carry the suffix — npm strips semver build metadata (`npm version
+1.0.0+jamwil` fails with "Version not changed"; `npm publish` silently
+republishes it as `1.0.0`) — so only the tag carries it.
+
+```text
+npm 1.0.0          -> tag v1.0.0+jamwil
+npm 1.0.1-jamwil.0 -> tag v1.0.1-jamwil.0+jamwil
+npm 1.0.1-dev.0    -> tag v1.0.1-dev.0+jamwil
+```
+
+CI's released-changelog check compares released sections against the newest
+tag: a branch rebased onto the newest upstream release passes, and a branch
+older than it fails by design (it is stale).
 
 ## Stable release
 
@@ -73,9 +90,9 @@ The tag points at the rebased HEAD.
 
 ```bash
 npm run publish:coding-agent
-git tag "v1.0.0"
+git tag "v1.0.0+jamwil"
 git push origin HEAD
-git push origin "v1.0.0"
+git push origin "v1.0.0+jamwil"
 ```
 
 ## Fork hotfix release
@@ -105,9 +122,9 @@ git add packages/coding-agent/package.json package-lock.json \
 git commit -m "Release @jamwil/pi-coding-agent v$VERSION"
 
 npm run publish:coding-agent
-git tag "v$VERSION"
+git tag "v$VERSION+jamwil"
 git push origin HEAD
-git push origin "v$VERSION"
+git push origin "v$VERSION+jamwil"
 ```
 
 ## Dev release
@@ -135,10 +152,11 @@ npm run publish:dev:coding-agent
 git push origin HEAD
 
 # Optional
-git tag "v$VERSION"
-git push origin "v$VERSION"
+git tag "v$VERSION+jamwil"
+git push origin "v$VERSION+jamwil"
 ```
 
 After rebasing onto a new upstream release, no version arithmetic is needed:
 the stable version is the upstream version itself, dev builds prerelease the
 version they precede, and hotfixes (rare) prerelease the next upstream patch.
+Tags always append `+jamwil`.
